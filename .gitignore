@@ -1,0 +1,5 @@
+# Local Flutter SDK (kept inside the repo for 42)
+/flutter/
+
+# Environment secrets
+.env

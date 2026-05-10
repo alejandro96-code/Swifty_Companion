@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+FLUTTER_BIN="$SCRIPT_DIR/flutter/bin/flutter"
+
+if [[ ! -x "$FLUTTER_BIN" ]]; then
+  echo "Flutter binary not found at $FLUTTER_BIN" >&2
+  exit 1
+fi
+
+exec "$FLUTTER_BIN" "$@"

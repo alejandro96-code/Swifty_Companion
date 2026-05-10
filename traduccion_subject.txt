@@ -1,0 +1,50 @@
+Proyecto: Swifty Companion
+
+Objetivos:
+
+Este proyecto tiene como objetivo familiarizarte con:
+• lenguajes de programacion movil (Dart, Swift, Kotlin, Java, etc.).
+• cualquier IDE de tu eleccion (Android Studio parece una buena opcion).
+• frameworks moviles (Flutter).
+• API de 42.
+
+Instrucciones generales
+
+• Puedes usar cualquier lenguaje movil. Ten en cuenta que debes usar la ultima version
+del IDE disponible en los ordenadores de tu escuela.
+• Puedes usar cualquier framework o biblioteca compatible siempre que su uso este
+justificado durante tu defensa. Se inteligente.
+• Este proyecto debe usar la ultima version disponible de la API de 42.
+• Recuerda que tu eleccion puede hacerte mas atractivo en el mercado laboral.
+
+Por razones evidentes de seguridad, cualquier credencial, clave de API, variables de
+entorno, etc., debe guardarse localmente en un archivo .env e ignorarse
+por git. Las credenciales almacenadas publicamente conduciran directamente al
+fracaso del proyecto.
+
+El proyecto
+
+V.1 Parte obligatoria
+
+Para validar la parte obligatoria del proyecto, debes cumplir con los siguientes criterios:
+
+• Tu app debe tener al menos 2 vistas.
+• Debes manejar todos los casos de error (login no encontrado, error de red, etc.).
+• La segunda vista debe mostrar la informacion del login, si el login existe.
+• Debes mostrar al menos cuatro detalles del usuario (login, email, movil, nivel, ubicacion, billetera, evaluaciones, etc.) junto con la foto de perfil.
+• Debes mostrar las habilidades del usuario con nivel y porcentaje.
+• Debes mostrar los proyectos que el usuario ha completado, incluidos los fallidos.
+• Tu app debe permitir volver a la primera vista.
+• Este proyecto debe usar una tecnica de diseno flexible o moderna, como restricciones de diseno, para asegurar que la interfaz se muestre correctamente en diferentes tamanos de pantalla y plataformas moviles.
+• No crees un token por cada consulta.
+
+Consulta la documentacion de OAuth2.
+
+Debes usar intra oauth2. Por cuestiones de privacidad de datos y en cumplimiento con
+las leyes pertinentes en ciertos paises, puede ser necesario abstenerse de divulgar
+cierta informacion.
+
+Bonus disponible:
+
+• Recrear el token en la fecha de expiracion. Si el token expira, la aplicacion debe refrescarlo.
+La aplicacion debe seguir funcionando correctamente en cualquier caso.
