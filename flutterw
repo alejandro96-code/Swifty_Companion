@@ -4,6 +4,15 @@ set -euo pipefail
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 FLUTTER_BIN="$SCRIPT_DIR/flutter/bin/flutter"
 
+# Use sgoinfre for Flutter/Dart caches when HOME is not explicitly set.
+if [[ -z "${HOME:-}" ]]; then
+  export HOME="/sgoinfre/students/${USER}/.flutter_home"
+fi
+if [[ -z "${PUB_CACHE:-}" ]]; then
+  export PUB_CACHE="/sgoinfre/students/${USER}/.pub-cache"
+fi
+mkdir -p "$HOME" "$PUB_CACHE"
+
 if [[ ! -x "$FLUTTER_BIN" ]]; then
   echo "Flutter binary not found at $FLUTTER_BIN" >&2
   exit 1
