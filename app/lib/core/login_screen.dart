@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import 'info_screen.dart';
 import 'services/forty_two_api.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -155,24 +156,35 @@ class _LoginScreenState extends State<LoginScreen> {
 															const SizedBox(height: 12),
 														itemBuilder: (context, index) {
 															final user = _results[index];
-															return Container(
-																padding: const EdgeInsets.all(12),
-																decoration: BoxDecoration(
-																	color: Colors.white,
-																	borderRadius:
-																		BorderRadius.circular(12),
-																),
-																child: Column(
-																	crossAxisAlignment:
-																		CrossAxisAlignment.start,
-																	children: [
-																		Text(
-																			user['login'] ?? '-',
-																			style: const TextStyle(
-																				fontWeight: FontWeight.bold,
-																			),
+															return GestureDetector(
+																onTap: () {
+																	Navigator.push(
+																		context,
+																		MaterialPageRoute(
+																			builder: (context) =>
+																				InfoScreen(login: user['login'] as String),
 																		),
-																	],
+																	);
+																},
+																child: Container(
+																	padding: const EdgeInsets.all(12),
+																	decoration: BoxDecoration(
+																		color: Colors.white,
+																		borderRadius:
+																			BorderRadius.circular(12),
+																	),
+																	child: Column(
+																		crossAxisAlignment:
+																			CrossAxisAlignment.start,
+																		children: [
+																			Text(
+																				user['login'] ?? '-',
+																				style: const TextStyle(
+																					fontWeight: FontWeight.bold,
+																				),
+																			),
+																		],
+																	),
 																),
 															);
 														},
