@@ -4,12 +4,17 @@ set -euo pipefail
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 FLUTTER_BIN="$SCRIPT_DIR/flutter/bin/flutter"
 
-# Use sgoinfre for Flutter/Dart caches when HOME is not explicitly set.
-if [[ -z "${HOME:-}" ]]; then
+# Configuración de caché para Flutter/Dart
+# - En 42 (sgoinfre): Usa /sgoinfre/students para no saturar el home
+# - En casa: Usa el directorio .flutter_home en el home del usuario
+if [[ -d "/sgoinfre/students/${USER}" ]]; then
+  # Estamos en 42: usa sgoinfre
   export HOME="/sgoinfre/students/${USER}/.flutter_home"
-fi
-if [[ -z "${PUB_CACHE:-}" ]]; then
   export PUB_CACHE="/sgoinfre/students/${USER}/.pub-cache"
+else
+  # Estamos en casa: usa home estándar
+  export HOME="${HOME:-$HOME}"
+  export PUB_CACHE="${PUB_CACHE:-$HOME/.pub-cache}"
 fi
 mkdir -p "$HOME" "$PUB_CACHE"
 
