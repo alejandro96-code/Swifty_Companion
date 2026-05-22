@@ -46,103 +46,160 @@ class _InfoScreenState extends State<InfoScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.blue[700],
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Header con botón de atrás
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  ElevatedButton.icon(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    icon: const Icon(Icons.arrow_back),
-                    label: const Text('Atrás'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: Colors.blue[700],
-                    ),
-                  ),
+      backgroundColor: Colors.transparent,
+      body: Stack(
+        children: [
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Color(0xFF0C2E5A),
+                  Color(0xFF155E75),
+                  Color(0xFF1B4965),
                 ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
             ),
-            // Contenido
-            Expanded(
-              child: _isLoading
-                  ? const Center(
-                      child: CircularProgressIndicator(
-                        color: Colors.white,
+          ),
+          SafeArea(
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+                  child: Row(
+                    children: [
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        icon: const Icon(Icons.arrow_back),
+                        label: const Text('Atras'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white.withOpacity(0.95),
+                          foregroundColor: const Color(0xFF0C2E5A),
+                          elevation: 0,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 12,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                        ),
                       ),
-                    )
-                  : _error != null
-                      ? Center(
-                          child: Text(
-                            _error!,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                            ),
+                      const SizedBox(width: 16),
+                      const Expanded(
+                        child: Text(
+                          'Perfil 42',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 22,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.4,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: _isLoading
+                      ? const Center(
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
                           ),
                         )
-                      : _user != null
-                          ? LayoutBuilder(
-                              builder: (context, constraints) {
-                                final isWide = constraints.maxWidth >= 900;
-                                final content = isWide
-                                    ? Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Expanded(
-                                            flex: 5,
-                                            child: UserData(user: _user!),
-                                          ),
-                                          const SizedBox(width: 16),
-                                          Expanded(
-                                            flex: 4,
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.stretch,
-                                              children: [
-                                                UserLevel(
-                                                  login: widget.login,
-                                                ),
-                                                const SizedBox(height: 16),
-                                                UserProjects(
-                                                  login: widget.login,
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ],
-                                      )
-                                    : Column(
-                                        children: [
-                                          UserData(user: _user!),
-                                          const SizedBox(height: 16),
-                                          UserLevel(login: widget.login),
-                                          const SizedBox(height: 16),
-                                          UserProjects(login: widget.login),
-                                        ],
-                                      );
-
-                                return SingleChildScrollView(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                    vertical: 8,
-                                  ),
-                                  child: content,
-                                );
-                              },
+                      : _error != null
+                          ? Center(
+                              child: Text(
+                                _error!,
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                ),
+                              ),
                             )
-                          : const SizedBox(),
+                          : _user != null
+                              ? LayoutBuilder(
+                                  builder: (context, constraints) {
+                                    final isWide = constraints.maxWidth >= 980;
+                                    final maxCardHeight = 520.0;
+                                    final content = isWide
+                                        ? Row(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Expanded(
+                                                child: SizedBox(
+                                                  height: maxCardHeight,
+                                                  child: UserData(
+                                                    user: _user!,
+                                                    forceTwoColumns: true,
+                                                    fillHeight: true,
+                                                  ),
+                                                ),
+                                              ),
+                                              const SizedBox(width: 20),
+                                              Expanded(
+                                                child: SizedBox(
+                                                  height: maxCardHeight,
+                                                  child: UserLevel(
+                                                    login: widget.login,
+                                                    maxListHeight:
+                                                        maxCardHeight - 120,
+                                                  ),
+                                                ),
+                                              ),
+                                              const SizedBox(width: 20),
+                                              Expanded(
+                                                child: SizedBox(
+                                                  height: maxCardHeight,
+                                                  child: UserProjects(
+                                                    login: widget.login,
+                                                    maxListHeight:
+                                                        maxCardHeight - 170,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          )
+                                        : Column(
+                                            children: [
+                                              UserData(user: _user!),
+                                              const SizedBox(height: 16),
+                                              UserLevel(login: widget.login),
+                                              const SizedBox(height: 16),
+                                              UserProjects(login: widget.login),
+                                            ],
+                                          );
+
+                                    return Center(
+                                      child: SingleChildScrollView(
+                                        padding: const EdgeInsets.fromLTRB(
+                                          18,
+                                          8,
+                                          18,
+                                          24,
+                                        ),
+                                        child: ConstrainedBox(
+                                          constraints:
+                                              const BoxConstraints(maxWidth: 1120),
+                                          child: content,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                )
+                              : const SizedBox(),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

@@ -4,8 +4,13 @@ import '../services/forty_two_api.dart';
 
 class UserLevel extends StatefulWidget {
   final String login;
+  final double? maxListHeight;
 
-  const UserLevel({required this.login, super.key});
+  const UserLevel({
+    required this.login,
+    this.maxListHeight,
+    super.key,
+  });
 
   @override
   State<UserLevel> createState() => _UserLevelState();
@@ -47,16 +52,33 @@ class _UserLevelState extends State<UserLevel> {
       return [];
     }
 
+    Map<String, dynamic>? fallback;
     for (final cursus in cursusUsers) {
       if (cursus is! Map<String, dynamic>) {
         continue;
       }
       final skills = cursus['skills'];
-      if (skills is List) {
+      if (skills is! List) {
+        continue;
+      }
+      final cursusInfo = cursus['cursus'] as Map<String, dynamic>?;
+      final slug = cursusInfo?['slug']?.toString();
+      if (slug == '42cursus') {
         return skills.whereType<Map<String, dynamic>>().toList();
       }
+      fallback ??= cursus;
     }
 
+    final skills = fallback?['skills'];
+    if (skills is List) {
+      final list = skills.whereType<Map<String, dynamic>>().toList();
+      list.sort((a, b) {
+        final aName = (a['name'] ?? '').toString().toLowerCase();
+        final bName = (b['name'] ?? '').toString().toLowerCase();
+        return aName.compareTo(bName);
+      });
+      return list;
+    }
     return [];
   }
 
@@ -84,56 +106,118 @@ class _UserLevelState extends State<UserLevel> {
     }
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.9),
-        borderRadius: BorderRadius.circular(12),
+        color: Colors.white.withOpacity(0.92),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: Colors.white.withOpacity(0.6)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 18,
+            offset: const Offset(0, 10),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Habilidades',
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: Colors.black87,
-            ),
+          Row(
+            children: [
+              const Text(
+                'Habilidades',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF0F172A),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE6F1FF),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  '${_skills.length}',
+                  style: const TextStyle(
+                    color: Color(0xFF1E3A8A),
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 12),
-          ListView.separated(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: _skills.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 12),
-            itemBuilder: (context, index) {
-              final skill = _skills[index];
-              final name = (skill['name'] ?? '-').toString();
-              final level = (skill['level'] as num?)?.toDouble() ?? 0.0;
-              final fraction = level - level.floorToDouble();
-              final percent = (fraction * 100).round();
-              final progress = fraction.clamp(0.0, 1.0).toDouble();
+          const SizedBox(height: 14),
+          SizedBox(
+            height: widget.maxListHeight,
+            child: ListView.separated(
+              shrinkWrap: widget.maxListHeight == null,
+              physics: widget.maxListHeight == null
+                  ? const NeverScrollableScrollPhysics()
+                  : const BouncingScrollPhysics(),
+              itemCount: _skills.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 14),
+              itemBuilder: (context, index) {
+                final skill = _skills[index];
+                final name = (skill['name'] ?? '-').toString();
+                final level = (skill['level'] as num?)?.toDouble() ?? 0.0;
+                final fraction = level - level.floorToDouble();
+                final percent = (fraction * 100).round();
+                final progress = fraction.clamp(0.0, 1.0).toDouble();
 
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '$name - Nivel ${level.toStringAsFixed(2)} ($percent%)',
-                    style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            name,
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF0F172A),
+                            ),
+                          ),
+                        ),
+                        Text(
+                          'Lvl ${level.toStringAsFixed(2)}',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Color(0xFF64748B),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          '$percent%',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF1E3A8A),
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                  const SizedBox(height: 6),
-                  LinearProgressIndicator(
-                    value: progress,
-                    minHeight: 6,
-                    backgroundColor: Colors.grey.shade300,
-                    color: Colors.blue[700],
-                  ),
-                ],
-              );
-            },
+                    const SizedBox(height: 8),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: LinearProgressIndicator(
+                        value: progress,
+                        minHeight: 7,
+                        backgroundColor: const Color(0xFFE8ECF5),
+                        color: const Color(0xFF1D4ED8),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
           ),
         ],
       ),
