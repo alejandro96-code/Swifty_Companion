@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import 'info_screen.dart';
-import 'services/forty_two_api.dart';
+import '../services/forty_two_api.dart';
 
 class LoginScreen extends StatefulWidget {
 	const LoginScreen({super.key});
@@ -156,13 +156,22 @@ class _LoginScreenState extends State<LoginScreen> {
 															const SizedBox(height: 12),
 														itemBuilder: (context, index) {
 															final user = _results[index];
+															final login = user['login']?.toString();
 															return GestureDetector(
 																onTap: () {
+																	if (login == null || login.isEmpty) {
+																		ScaffoldMessenger.of(context).showSnackBar(
+																			const SnackBar(
+																				content: Text('Login no disponible.'),
+																			),
+																		);
+																		return;
+																	}
 																	Navigator.push(
 																		context,
 																		MaterialPageRoute(
 																			builder: (context) =>
-																				InfoScreen(login: user['login'] as String),
+																				InfoScreen(login: login),
 																		),
 																	);
 																},

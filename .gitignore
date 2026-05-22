@@ -3,3 +3,5 @@
 
 # Environment secrets
 .env
+.vscode/settings.json
+

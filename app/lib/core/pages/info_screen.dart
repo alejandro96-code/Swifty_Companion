@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'services/forty_two_api.dart';
+import '../services/forty_two_api.dart';
 
 class InfoScreen extends StatefulWidget {
   final String login;
