@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../components/user_data.dart';
+import '../components/user_level.dart';
+import '../components/user_projects.dart';
 import '../services/forty_two_api.dart';
 
 class InfoScreen extends StatefulWidget {
@@ -86,133 +89,55 @@ class _InfoScreenState extends State<InfoScreen> {
                           ),
                         )
                       : _user != null
-                          ? Center(
-                              child: SingleChildScrollView(
-                                child: Padding(
+                          ? LayoutBuilder(
+                              builder: (context, constraints) {
+                                final isWide = constraints.maxWidth >= 900;
+                                final content = isWide
+                                    ? Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Expanded(
+                                            flex: 5,
+                                            child: UserData(user: _user!),
+                                          ),
+                                          const SizedBox(width: 16),
+                                          Expanded(
+                                            flex: 4,
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.stretch,
+                                              children: [
+                                                UserLevel(
+                                                  login: widget.login,
+                                                ),
+                                                const SizedBox(height: 16),
+                                                UserProjects(
+                                                  login: widget.login,
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      )
+                                    : Column(
+                                        children: [
+                                          UserData(user: _user!),
+                                          const SizedBox(height: 16),
+                                          UserLevel(login: widget.login),
+                                          const SizedBox(height: 16),
+                                          UserProjects(login: widget.login),
+                                        ],
+                                      );
+
+                                return SingleChildScrollView(
                                   padding: const EdgeInsets.symmetric(
-                                    horizontal: 24,
-                                    vertical: 16,
+                                    horizontal: 16,
+                                    vertical: 8,
                                   ),
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      // Foto del usuario
-                                      if (_user!['image'] != null)
-                                        Container(
-                                          decoration: BoxDecoration(
-                                            shape: BoxShape.circle,
-                                            border: Border.all(
-                                              color: Colors.white,
-                                              width: 4,
-                                            ),
-                                          ),
-                                          child: CircleAvatar(
-                                            radius: 80,
-                                            backgroundImage: NetworkImage(
-                                              (_user!['image'] is String
-                                                      ? _user!['image']
-                                                      : _user!['image']
-                                                              ['versions']
-                                                          ?['large']) ??
-                                                  '',
-                                            ),
-                                            onBackgroundImageError:
-                                                (exception, stackTrace) {
-                                              // Fallback si hay error en la imagen
-                                              debugPrint(
-                                                'Error cargando imagen: $exception',
-                                              );
-                                            },
-                                          ),
-                                        )
-                                      else
-                                        Container(
-                                          decoration: BoxDecoration(
-                                            shape: BoxShape.circle,
-                                            border: Border.all(
-                                              color: Colors.white,
-                                              width: 4,
-                                            ),
-                                          ),
-                                          child: CircleAvatar(
-                                            radius: 80,
-                                            backgroundColor: Colors.white,
-                                            child: Icon(
-                                              Icons.person,
-                                              size: 60,
-                                              color: Colors.blue[700],
-                                            ),
-                                          ),
-                                        ),
-                                      const SizedBox(height: 32),
-                                      // Nombre
-                                      Container(
-                                        padding: const EdgeInsets.all(16),
-                                        decoration: BoxDecoration(
-                                          color: Colors.white.withOpacity(0.9),
-                                          borderRadius:
-                                              BorderRadius.circular(12),
-                                        ),
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            const Text(
-                                              'Nombre',
-                                              style: TextStyle(
-                                                fontSize: 12,
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.grey,
-                                              ),
-                                            ),
-                                            const SizedBox(height: 4),
-                                            Text(
-                                              _user!['displayname'] ??
-                                                  _user!['login'] ??
-                                                  '-',
-                                              style: const TextStyle(
-                                                fontSize: 18,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      const SizedBox(height: 16),
-                                      // Correo
-                                      Container(
-                                        padding: const EdgeInsets.all(16),
-                                        decoration: BoxDecoration(
-                                          color: Colors.white.withOpacity(0.9),
-                                          borderRadius:
-                                              BorderRadius.circular(12),
-                                        ),
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            const Text(
-                                              'Correo',
-                                              style: TextStyle(
-                                                fontSize: 12,
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.grey,
-                                              ),
-                                            ),
-                                            const SizedBox(height: 4),
-                                            Text(
-                                              _user!['email'] ?? '-',
-                                              style: const TextStyle(
-                                                fontSize: 16,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
+                                  child: content,
+                                );
+                              },
                             )
                           : const SizedBox(),
             ),
