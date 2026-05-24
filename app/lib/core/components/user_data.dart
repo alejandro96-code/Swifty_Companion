@@ -134,24 +134,6 @@ class UserData extends StatelessWidget {
     return city == null || city.isEmpty ? name : '$name ($city)';
   }
 
-  String _formatStatus() {
-    final isStaff = user['staff?'] == true;
-    final poolYear = user['pool_year']?.toString();
-    final poolMonth = user['pool_month']?.toString();
-    final isAlumni = user['alumni?'] == true;
-
-    if (isStaff) {
-      return 'staff';
-    }
-    if (poolYear != null && poolMonth != null) {
-      return 'pool ($poolMonth $poolYear)';
-    }
-    if (isAlumni) {
-      return 'alumni';
-    }
-    return 'student';
-  }
-
   String _formatPool() {
     final poolYear = user['pool_year']?.toString();
     final poolMonth = user['pool_month']?.toString();
@@ -266,15 +248,6 @@ class UserData extends StatelessWidget {
                               decoration: BoxDecoration(
                                 color: const Color(0xFFE6F1FF),
                                 borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Text(
-                                _formatStatus(),
-                                style: const TextStyle(
-                                  color: Color(0xFF1E3A8A),
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w700,
-                                  letterSpacing: 0.4,
-                                ),
                               ),
                             ),
                           ],
