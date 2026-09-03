@@ -1,7 +1,6 @@
-# Local Flutter SDK (kept inside the repo for 42)
+# Local Flutter SDK (Docker is the supported execution method)
 /flutter/
 
 # Environment secrets
 .env
 .vscode/settings.json
-

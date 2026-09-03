@@ -1,21 +1,33 @@
 # Swifty_Companion
 
-## Pasos para casa
+## Evaluacion con Docker
+
+Necesitas tener Docker instalado y en ejecucion. No hace falta instalar Flutter,
+Dart, Chrome ni tener permisos sudo.
 
 ```bash
-cd /ruta/a/Swifty_Companion
-curl -L https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.22.1-stable.tar.xz -o flutter.tar.xz
-tar xf flutter.tar.xz
-rm flutter.tar.xz
-./flutterw --version
+make docker-up
 ```
 
-## Como lanzarlo
+Abre <http://localhost:8080> en el navegador. Para detenerlo, pulsa `Ctrl+C`.
+El primer arranque descarga la imagen de Flutter y puede tardar unos minutos.
+
+La aplicacion necesita las credenciales de una aplicacion OAuth de 42 para
+consultar la API. Puedes exportarlas antes de arrancar:
 
 ```bash
-cd app
-../flutterw pub get
-../flutterw run -d chrome
+export CLIENT_ID="tu_client_id"
+export CLIENT_SECRET="tu_client_secret"
+make docker-up
+```
+
+Tambien puedes crear `.env` en la raiz del proyecto a partir de `.env.example`;
+ese archivo no se versiona.
+
+Para detener el contenedor:
+
+```bash
+make docker-down
 ```
 
 ## Info
