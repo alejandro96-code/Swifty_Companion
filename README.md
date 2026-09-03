@@ -19,6 +19,20 @@ El primer arranque descarga la imagen de Flutter y puede tardar unos minutos.
 
 El archivo `.env` se crea en la raiz y no se versiona.
 
+`make docker-up` ejecuta Flutter en modo debug, por lo que puedes usar `r` para
+*hot reload* en la terminal. El servicio se ejecuta de forma interactiva para
+que Flutter reciba las teclas directamente.
+
+Para abrir el proyecto en Android Studio:
+
+```bash
+make android-studio
+```
+
+Este comando abre la carpeta `app/` en Android Studio instalado en tu sistema.
+Android Studio no se ejecuta dentro del contenedor; Docker se mantiene para la
+ejecucion reproducible de Flutter.
+
 Para detener el contenedor:
 
 ```bash

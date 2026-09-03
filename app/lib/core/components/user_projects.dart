@@ -62,8 +62,7 @@ class _UserProjectsState extends State<UserProjects> {
     }
 
     final piscineIds = <int>{};
-    final outerIds = <int>{};
-    int? coreId;
+    var coreCompleted = false;
 
     if (cursusUsers != null) {
       for (final entry in cursusUsers) {
@@ -79,19 +78,19 @@ class _UserProjectsState extends State<UserProjects> {
         final name = cursus?['name']?.toString().toLowerCase() ?? '';
         final isPiscine = slug.contains('piscine') || name.contains('piscine');
         if (slug == '42cursus') {
-          coreId = id;
+          coreCompleted = coreCompleted ||
+              entry['completed'] == true ||
+              entry['end_at'] != null;
         } else if (isPiscine) {
           piscineIds.add(id);
-        } else {
-          outerIds.add(id);
         }
       }
     }
 
+    final cursusSectionName = coreCompleted ? 'Cursus + Outer' : 'Cursus';
     final sections = <String, List<Map<String, dynamic>>>{
       'Piscine': [],
-      'Cursus': [],
-      'Outer': [],
+      cursusSectionName: [],
     };
 
     for (final entry in projectsUsers) {
@@ -111,11 +110,7 @@ class _UserProjectsState extends State<UserProjects> {
         sections['Piscine']!.add(entry);
         continue;
       }
-      if (coreId != null && ids.contains(coreId)) {
-        sections['Cursus']!.add(entry);
-        continue;
-      }
-      sections['Outer']!.add(entry);
+      sections[cursusSectionName]!.add(entry);
     }
 
     for (final list in sections.values) {

@@ -8,7 +8,7 @@ set -eu
 } > .env
 
 exec flutter run \
-  --release \
+  --debug \
   --device-id web-server \
   --web-hostname 0.0.0.0 \
   --web-port 8080
