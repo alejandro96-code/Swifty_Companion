@@ -9,20 +9,15 @@ Dart, Chrome ni tener permisos sudo.
 make docker-up
 ```
 
+El comando pedira interactivamente el `CLIENT_ID` y el `CLIENT_SECRET` de tu
+aplicacion OAuth de 42 y creara el archivo `.env` local. El secret no se
+mostrara mientras lo escribes. Si necesitas regenerarlo, ejecuta
+`make setup-env`.
+
 Abre <http://localhost:8080> en el navegador. Para detenerlo, pulsa `Ctrl+C`.
 El primer arranque descarga la imagen de Flutter y puede tardar unos minutos.
 
-La aplicacion necesita las credenciales de una aplicacion OAuth de 42 para
-consultar la API. Puedes exportarlas antes de arrancar:
-
-```bash
-export CLIENT_ID="tu_client_id"
-export CLIENT_SECRET="tu_client_secret"
-make docker-up
-```
-
-Tambien puedes crear `.env` en la raiz del proyecto a partir de `.env.example`;
-ese archivo no se versiona.
+El archivo `.env` se crea en la raiz y no se versiona.
 
 Para detener el contenedor:
 
