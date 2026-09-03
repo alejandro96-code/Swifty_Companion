@@ -4,3 +4,6 @@
 # Environment secrets
 .env
 .vscode/settings.json
+
+# Optional user-local Flutter installation
+/flutter/

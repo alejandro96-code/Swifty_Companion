@@ -57,7 +57,7 @@ class _UserProjectsState extends State<UserProjects> {
       if (!mounted) return;
 
       setState(() {
-        _error = error.toString();
+        _error = _api.errorMessage(error);
         _isLoading = false;
       });
     }

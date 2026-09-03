@@ -37,7 +37,7 @@ class _InfoScreenState extends State<InfoScreen> {
     } catch (error) {
       if (!mounted) return;
       setState(() {
-        _error = error.toString();
+        _error = _api.errorMessage(error);
         _isLoading = false;
       });
     }

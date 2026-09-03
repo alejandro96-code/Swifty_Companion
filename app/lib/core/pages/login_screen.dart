@@ -62,7 +62,7 @@ class _LoginScreenState extends State<LoginScreen> {
 					return;
 				}
 				setState(() {
-					_error = error.toString();
+					_error = _api.errorMessage(error);
 					_results = [];
 				});
 			} finally {
@@ -144,6 +144,17 @@ class _LoginScreenState extends State<LoginScreen> {
 													style: const TextStyle(
 														color: Colors.white,
 													),
+												),
+											],
+											if (!_isLoading &&
+												_error == null &&
+												_results.isEmpty &&
+												_controller.text.trim().length >= 2) ...[
+												const SizedBox(height: 16),
+												const Text(
+													'No se encontraron usuarios.',
+													textAlign: TextAlign.center,
+													style: TextStyle(color: Colors.white),
 												),
 											],
 											if (_results.isNotEmpty) ...[

@@ -1,7 +1,17 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
+
+class FortyTwoApiException implements Exception {
+  const FortyTwoApiException(this.message);
+
+  final String message;
+
+  @override
+  String toString() => message;
+}
 
 class FortyTwoApi {
   FortyTwoApi({http.Client? client}) : _client = client ?? http.Client();
@@ -9,6 +19,19 @@ class FortyTwoApi {
   final http.Client _client;
   String? _accessToken;
   DateTime? _tokenExpiry;
+
+  String errorMessage(Object error) {
+    if (error is FortyTwoApiException) {
+      return error.message;
+    }
+    if (error is TimeoutException) {
+      return 'La solicitud tardo demasiado. Comprueba tu conexion e intentalo de nuevo.';
+    }
+    if (error is http.ClientException) {
+      return 'No se pudo conectar con 42. Comprueba tu conexion a internet.';
+    }
+    return 'Ha ocurrido un error inesperado. Intentalo de nuevo.';
+  }
 
   Future<Map<String, dynamic>> fetchUser(String login) async {
     final token = await _getAccessToken();
@@ -27,10 +50,10 @@ class FortyTwoApi {
     }
 
     if (response.statusCode == 404) {
-      throw Exception('Login no encontrado');
+      throw const FortyTwoApiException('Login no encontrado.');
     }
 
-    throw Exception('Error de API: ${response.statusCode}');
+    throw FortyTwoApiException(_messageForStatus(response.statusCode));
   }
 
   Future<List<Map<String, dynamic>>> fetchUserProjects(int userId) async {
@@ -57,13 +80,13 @@ class FortyTwoApi {
       );
 
       if (response.statusCode != 200) {
-        throw Exception('Error de API: ${response.statusCode}');
+        throw FortyTwoApiException(_messageForStatus(response.statusCode));
       }
 
       final data = jsonDecode(response.body);
 
       if (data is! List) {
-        throw Exception('Respuesta de proyectos invalida');
+        throw const FortyTwoApiException('La respuesta de proyectos no es valida.');
       }
 
       final pageProjects =
@@ -104,7 +127,7 @@ class FortyTwoApi {
     );
 
     if (response.statusCode != 200) {
-      throw Exception('Error de API: ${response.statusCode}');
+      throw FortyTwoApiException(_messageForStatus(response.statusCode));
     }
 
     final data = jsonDecode(response.body) as List<dynamic>;
@@ -127,7 +150,9 @@ class FortyTwoApi {
     final clientSecret = dotenv.env['CLIENT_SECRET'];
 
     if (clientId == null || clientSecret == null) {
-      throw Exception('Faltan CLIENT_ID o CLIENT_SECRET en .env');
+      throw const FortyTwoApiException(
+        'Faltan las credenciales de 42. Revisa el archivo .env.',
+      );
     }
 
     final uri = Uri.parse(
@@ -145,7 +170,9 @@ class FortyTwoApi {
     );
 
     if (response.statusCode != 200) {
-      throw Exception('No se pudo obtener token: ${response.statusCode}');
+      throw FortyTwoApiException(
+        'No se pudo autenticar con 42 (${response.statusCode}).',
+      );
     }
 
     final json = jsonDecode(response.body) as Map<String, dynamic>;
@@ -153,7 +180,9 @@ class FortyTwoApi {
     final expiresIn = json['expires_in'] as int?;
 
     if (accessToken == null || expiresIn == null) {
-      throw Exception('Respuesta de token invalida');
+      throw const FortyTwoApiException(
+        'La respuesta de autenticacion no es valida.',
+      );
     }
 
     _accessToken = accessToken;
@@ -162,5 +191,18 @@ class FortyTwoApi {
         .add(Duration(seconds: expiresIn - 30));
 
     return accessToken;
+  }
+
+  String _messageForStatus(int statusCode) {
+    if (statusCode == 401 || statusCode == 403) {
+      return 'No tienes permiso para consultar los datos de 42.';
+    }
+    if (statusCode == 429) {
+      return 'Demasiadas solicitudes. Espera un momento e intentalo de nuevo.';
+    }
+    if (statusCode >= 500) {
+      return 'El servicio de 42 no esta disponible. Intentalo mas tarde.';
+    }
+    return 'El servicio de 42 devolvio un error ($statusCode).';
   }
 }

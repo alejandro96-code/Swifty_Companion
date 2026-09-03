@@ -1,4 +1,7 @@
-.PHONY: docker-up docker-down setup-env android-studio
+.PHONY: docker-up docker-down setup-env setup-flutter android-studio
+
+setup-flutter:
+	@cd app && bash ../scripts/setup_flutter.sh
 
 setup-env:
 	@if [ -f .env ]; then \
@@ -17,7 +20,24 @@ setup-env:
 	fi
 
 docker-up: setup-env
-	docker compose run --build --rm --service-ports swifty-companion
+	docker compose up --build -d
+	@i=0; \
+	until curl -fsS http://localhost:8080 >/dev/null 2>&1 || [ $$i -ge 30 ]; do \
+		i=$$((i + 1)); \
+		sleep 2; \
+	done; \
+	if curl -fsS http://localhost:8080 >/dev/null 2>&1; then \
+		printf '%s\n' 'Swifty Companion disponible en http://localhost:8080'; \
+		if command -v xdg-open >/dev/null 2>&1; then \
+			xdg-open http://localhost:8080 >/dev/null 2>&1 || true; \
+		elif command -v open >/dev/null 2>&1; then \
+			open http://localhost:8080 >/dev/null 2>&1 || true; \
+		fi; \
+	else \
+		printf '%s\n' 'El servidor no respondio. Revisa los logs:'; \
+		docker compose logs --tail=50 swifty-companion; \
+		exit 1; \
+	fi
 
 docker-down:
 	docker compose down

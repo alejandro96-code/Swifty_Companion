@@ -1,74 +1,92 @@
 # Swifty_Companion
 
-## Evaluacion con Docker
+## Ejecucion para evaluacion (sin sudo)
 
-Necesitas tener Docker instalado y en ejecucion. No hace falta instalar Flutter,
-Dart, Chrome ni tener permisos sudo.
+La forma recomendada para el evaluador es Docker. Solo necesita tener Docker
+Desktop o Docker Engine ya instalado y permiso para ejecutar Docker; no necesita
+instalar Flutter, Dart, Chrome, Android Studio ni usar `sudo`.
 
 ```bash
+git clone https://github.com/alejandro96-code/Swifty_Companion.git
+cd Swifty_Companion
 make docker-up
 ```
 
 El comando pedira interactivamente el `CLIENT_ID` y el `CLIENT_SECRET` de tu
 aplicacion OAuth de 42 y creara el archivo `.env` local. El secret no se
-mostrara mientras lo escribes. Si necesitas regenerarlo, ejecuta
-`make setup-env`.
+mostrara mientras lo escribes. Despues construira la imagen con Flutter,
+instalara las dependencias Dart, levantara Flutter Web y abrira
+<http://localhost:8080> en el navegador si el sistema lo permite.
 
-Abre <http://localhost:8080> en el navegador. Para detenerlo, pulsa `Ctrl+C`.
-El primer arranque descarga la imagen de Flutter y puede tardar unos minutos.
+Si necesitas regenerar las credenciales, ejecuta `make setup-env`.
 
-El archivo `.env` se crea en la raiz y no se versiona.
-
-`make docker-up` ejecuta Flutter en modo debug, por lo que puedes usar `r` para
-*hot reload* en la terminal. El servicio se ejecuta de forma interactiva para
-que Flutter reciba las teclas directamente.
-
-Para abrir el proyecto en Android Studio:
-
-```bash
-make android-studio
-```
-
-Este comando abre la carpeta `app/` en Android Studio instalado en tu sistema.
-Android Studio no se ejecuta dentro del contenedor; Docker se mantiene para la
-ejecucion reproducible de Flutter.
-
+Si el navegador no se abre automaticamente, visita <http://localhost:8080>.
 Para detener el contenedor:
 
 ```bash
 make docker-down
 ```
 
-## Info
+El primer arranque descarga la imagen de Flutter y puede tardar unos minutos.
 
-### Que es un widget en Flutter
+El archivo `.env` se crea en la raiz y no se versiona.
 
-- Todo es un widget: pantallas, textos, botones, layouts.
-- Un widget es una clase que describe como se ve algo.
+`make docker-up` ejecuta Flutter Web en modo debug dentro del contenedor.
+Flutter y sus dependencias se instalan dentro de la imagen Docker, no en el
+sistema anfitrion.
 
-### StatelessWidget vs StatefulWidget
+## Ejecucion en Android Studio
 
-- `LoginScreen` es `StatelessWidget` porque no cambia con el tiempo.
-- Usa `StatefulWidget` cuando necesitas estado (por ejemplo: texto del input, loading, errores).
+Android Studio y el SDK de Android son necesarios únicamente para ejecutar la
+aplicacion en un emulador o telefono Android. El proyecto se abre seleccionando
+la carpeta `app/`, no la raiz del repositorio. Antes de pulsar Run, crea las
+credenciales para Flutter:
 
-### El metodo `build`
+```bash
+cp app/.env.example app/.env
+```
 
-- Es el render de Flutter. Se ejecuta para dibujar la UI.
-- Devuelve un arbol de widgets (layout → contenido).
+Después sustituye los valores de `app/.env` por tus credenciales de 42 y pulsa
+`Pub get` en Android Studio. La aplicación incluye el permiso de Internet para
+Android.
 
-### Como esta compuesto `LoginScreen`
+### Flutter local sin sudo
 
-- `Scaffold` es el contenedor base de una pantalla Material.
-- `SafeArea` evita que el contenido choque con el notch o la barra superior.
-- `Center` centra el contenido.
-- `Text` es el equivalente a un `h1` si le das un `TextStyle` grande y bold.
+Si Flutter no esta instalado y no tienes permisos `sudo`, desde la raiz del
+repositorio ejecuta:
 
-### Estilos y H1
+```bash
+cd Swifty_Companion
+cd app
+bash ../scripts/setup_flutter.sh
+```
 
-- Flutter no tiene etiquetas HTML; el tamano y peso se controla con `TextStyle`.
-- Un H1 tipico seria `fontSize: 32` y `fontWeight: FontWeight.bold`.
+Desde la raiz del repositorio también puedes usar `make setup-flutter`.
 
-### Ciclo de actualizacion
+El instalador descarga Flutter `3.22.1` en
+`~/.local/share/flutter` y ejecuta `flutter pub get`. No modifica archivos del
+sistema ni necesita permisos de administrador. Para que `flutter` quede
+disponible en la terminal actual:
 
-- En `StatelessWidget` no hay cambios internos.
-- En `StatefulWidget`, cuando llamas a `setState()`, Flutter vuelve a ejecutar `build`.
+```bash
+export PATH="$HOME/.local/share/flutter/bin:$PATH"
+cd app
+flutter devices
+flutter run
+```
+
+También puedes ejecutar directamente sin modificar el `PATH`:
+
+```bash
+~/.local/share/flutter/bin/flutter run
+```
+
+En Android Studio, abre la carpeta `app/`, selecciona el emulador Android y
+pulsa **Run**. Android Studio debe tener configurada la ruta de Flutter local
+`~/.local/share/flutter`.
+
+Si Android Studio ya está instalado, también puedes abrir el proyecto con:
+
+```bash
+make android-studio
+```
