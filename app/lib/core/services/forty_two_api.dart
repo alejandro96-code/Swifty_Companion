@@ -12,7 +12,11 @@ class FortyTwoApi {
 
   Future<Map<String, dynamic>> fetchUser(String login) async {
     final token = await _getAccessToken();
-    final uri = Uri.parse('https://api.intra.42.fr/v2/users/$login');
+
+    final uri = Uri.parse(
+      'https://api.intra.42.fr/v2/users/$login',
+    );
+
     final response = await _client.get(
       uri,
       headers: {'Authorization': 'Bearer $token'},
@@ -29,17 +33,71 @@ class FortyTwoApi {
     throw Exception('Error de API: ${response.statusCode}');
   }
 
+  Future<List<Map<String, dynamic>>> fetchUserProjects(int userId) async {
+    final token = await _getAccessToken();
+
+    const pageSize = 100;
+    final projects = <Map<String, dynamic>>[];
+    var page = 1;
+
+    while (true) {
+      final uri = Uri.https(
+        'api.intra.42.fr',
+        '/v2/projects_users',
+        {
+          'filter[user_id]': userId.toString(),
+          'page[number]': page.toString(),
+          'page[size]': pageSize.toString(),
+        },
+      );
+
+      final response = await _client.get(
+        uri,
+        headers: {'Authorization': 'Bearer $token'},
+      );
+
+      if (response.statusCode != 200) {
+        throw Exception('Error de API: ${response.statusCode}');
+      }
+
+      final data = jsonDecode(response.body);
+
+      if (data is! List) {
+        throw Exception('Respuesta de proyectos invalida');
+      }
+
+      final pageProjects =
+          data.whereType<Map<String, dynamic>>().map((projectUser) {
+        return {
+          ...projectUser,
+          'validated': projectUser['validated?'] == true,
+        };
+      }).toList();
+
+      projects.addAll(pageProjects);
+
+      if (pageProjects.length < pageSize) {
+        return projects;
+      }
+
+      page++;
+    }
+  }
+
   Future<List<Map<String, dynamic>>> searchUsers({
     required String query,
     int limit = 10,
   }) async {
     final token = await _getAccessToken();
     final rangeEnd = '${query}zzzz';
+
     final params = <String, String>{
       'range[login]': '$query,$rangeEnd',
       'page[size]': '$limit',
     };
+
     final uri = Uri.https('api.intra.42.fr', '/v2/users', params);
+
     final response = await _client.get(
       uri,
       headers: {'Authorization': 'Bearer $token'},
@@ -50,6 +108,7 @@ class FortyTwoApi {
     }
 
     final data = jsonDecode(response.body) as List<dynamic>;
+
     return data
         .whereType<Map<String, dynamic>>()
         .toList(growable: false);
@@ -58,6 +117,7 @@ class FortyTwoApi {
   Future<String> _getAccessToken() async {
     if (_accessToken != null && _tokenExpiry != null) {
       final now = DateTime.now().toUtc();
+
       if (now.isBefore(_tokenExpiry!)) {
         return _accessToken!;
       }
@@ -70,7 +130,10 @@ class FortyTwoApi {
       throw Exception('Faltan CLIENT_ID o CLIENT_SECRET en .env');
     }
 
-    final uri = Uri.parse('https://api.intra.42.fr/oauth/token');
+    final uri = Uri.parse(
+      'https://api.intra.42.fr/oauth/token',
+    );
+
     final response = await _client.post(
       uri,
       headers: {'Content-Type': 'application/x-www-form-urlencoded'},
@@ -94,7 +157,9 @@ class FortyTwoApi {
     }
 
     _accessToken = accessToken;
-    _tokenExpiry = DateTime.now().toUtc().add(Duration(seconds: expiresIn - 30));
+    _tokenExpiry = DateTime.now()
+        .toUtc()
+        .add(Duration(seconds: expiresIn - 30));
 
     return accessToken;
   }
