@@ -17,7 +17,9 @@ setup-env:
 		stty echo; \
 		printf '\n'; \
 		printf '%s\n' '# 42 API credentials' "CLIENT_ID=$$CLIENT_ID" "CLIENT_SECRET=$$CLIENT_SECRET" > .env; \
-	fi
+	fi; \
+	cp .env app/.env; \
+	chmod 600 .env app/.env
 
 docker-up: setup-env
 	docker compose up --build -d

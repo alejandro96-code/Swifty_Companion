@@ -13,8 +13,8 @@ make docker-up
 ```
 
 El comando pedira interactivamente el `CLIENT_ID` y el `CLIENT_SECRET` de tu
-aplicacion OAuth de 42 y creara el archivo `.env` local. El secret no se
-mostrara mientras lo escribes. Despues construira la imagen con Flutter,
+aplicacion OAuth de 42 y creara los archivos `.env` y `app/.env` locales. El
+secret no se mostrara mientras lo escribes. Despues construira la imagen con Flutter,
 instalara las dependencias Dart, levantara Flutter Web y abrira
 <http://localhost:8080> en el navegador si el sistema lo permite.
 
@@ -41,6 +41,9 @@ Android Studio y el SDK de Android son necesarios únicamente para ejecutar la
 aplicacion en un emulador o telefono Android. El proyecto se abre seleccionando
 la carpeta `app/`, no la raiz del repositorio. Antes de pulsar Run, crea las
 credenciales para Flutter:
+
+Si ya ejecutaste `make docker-up`, `app/.env` ya estara creado. Si prefieres
+configurar Android sin iniciar Docker, ejecuta:
 
 ```bash
 cp app/.env.example app/.env
