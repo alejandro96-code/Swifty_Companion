@@ -1,19 +1,21 @@
 import 'dart:async';
 import 'dart:convert';
-
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 
+// Create API Exception with message and return this.
 class FortyTwoApiException implements Exception {
-  const FortyTwoApiException(this.message);
 
+  const FortyTwoApiException(this.message);
   final String message;
 
   @override
   String toString() => message;
 }
 
+//create the Api client format and process the custom errors 
 class FortyTwoApi {
+
   FortyTwoApi({http.Client? client}) : _client = client ?? http.Client();
 
   final http.Client _client;
@@ -25,14 +27,15 @@ class FortyTwoApi {
       return error.message;
     }
     if (error is TimeoutException) {
-      return 'La solicitud tardo demasiado. Comprueba tu conexion e intentalo de nuevo.';
+      return 'The request took too long. Check your connection and try again.';
     }
     if (error is http.ClientException) {
-      return 'No se pudo conectar con 42. Comprueba tu conexion a internet.';
+      return 'Could not connect to 42. Check your internet connection.';
     }
-    return 'Ha ocurrido un error inesperado. Intentalo de nuevo.';
+    return 'An unexpected error occurred. Please try again.';
   }
 
+  // Get the profile of user_login
   Future<Map<String, dynamic>> fetchUser(String login) async {
     final token = await _getAccessToken();
     final uri = Uri.parse('https://api.intra.42.fr/v2/users/$login');
@@ -42,11 +45,12 @@ class FortyTwoApi {
       return jsonDecode(response.body) as Map<String, dynamic>;
     }
     if (response.statusCode == 404) {
-      throw const FortyTwoApiException('Login no encontrado.');
+      throw const FortyTwoApiException('Login not found.');
     }
     throw FortyTwoApiException(_messageForStatus(response.statusCode));
   }
 
+  // Get proyectos of userId
   Future<List<Map<String, dynamic>>> fetchUserProjects(int userId) async {
     final token = await _getAccessToken();
     const pageSize = 100;
@@ -68,7 +72,7 @@ class FortyTwoApi {
       final data = jsonDecode(response.body);
       if (data is! List) {
         throw const FortyTwoApiException(
-          'La respuesta de proyectos no es valida.',
+          'The projects response is invalid.',
         );
       }
 
@@ -87,6 +91,7 @@ class FortyTwoApi {
     }
   }
 
+  // Search users using prefix in the sesion init
   Future<List<Map<String, dynamic>>> searchUsers({
     required String query,
     int limit = 10,
@@ -106,6 +111,10 @@ class FortyTwoApi {
     return data.whereType<Map<String, dynamic>>().toList(growable: false);
   }
 
+/*
+  Recreate Access token, if accessToken exist and tokenExpiry not caducated reused
+  if not update token with POST /oauth/token and save accessToken and tokenExpiry
+*/
   Future<String> _getAccessToken() async {
     if (_accessToken != null && _tokenExpiry != null) {
       if (DateTime.now().toUtc().isBefore(_tokenExpiry!)) {
@@ -115,12 +124,9 @@ class FortyTwoApi {
 
     final clientId = dotenv.env['CLIENT_ID'];
     final clientSecret = dotenv.env['CLIENT_SECRET'];
-    if (clientId == null ||
-        clientId.isEmpty ||
-        clientSecret == null ||
-        clientSecret.isEmpty) {
+    if (clientId == null || clientId.isEmpty || clientSecret == null || clientSecret.isEmpty) {
       throw const FortyTwoApiException(
-        'Faltan las credenciales de 42. Revisa el archivo .env.',
+        'Missing 42 credentials. Check the .env file.',
       );
     }
 
@@ -136,7 +142,7 @@ class FortyTwoApi {
 
     if (response.statusCode != 200) {
       throw FortyTwoApiException(
-        'No se pudo autenticar con 42 (${response.statusCode}).',
+        'Could not authenticate with 42 (${response.statusCode}).',
       );
     }
 
@@ -145,10 +151,9 @@ class FortyTwoApi {
     final expiresIn = json['expires_in'] as int?;
     if (accessToken == null || expiresIn == null) {
       throw const FortyTwoApiException(
-        'La respuesta de autenticacion no es valida.',
+        'The authentication response is invalid.',
       );
     }
-
     _accessToken = accessToken;
     _tokenExpiry = DateTime.now()
         .toUtc()
@@ -156,20 +161,22 @@ class FortyTwoApi {
     return accessToken;
   }
 
+  // Builds the headers for requests.
   Map<String, String> _headers(String token) {
     return {'Authorization': 'Bearer $token'};
   }
 
+  // Maps HTTP status codes with custom menssages
   String _messageForStatus(int statusCode) {
     if (statusCode == 401 || statusCode == 403) {
-      return 'No tienes permiso para consultar los datos de 42.';
+      return 'You do not have permission to access 42 data.';
     }
     if (statusCode == 429) {
-      return 'Demasiadas solicitudes. Espera un momento e intentalo de nuevo.';
+      return 'Too many requests. Wait a moment and try again.';
     }
     if (statusCode >= 500) {
-      return 'El servicio de 42 no esta disponible. Intentalo mas tarde.';
+      return 'The 42 service is unavailable. Try again later.';
     }
-    return 'El servicio de 42 devolvio un error ($statusCode).';
+    return 'The 42 service returned an error ($statusCode).';
   }
 }

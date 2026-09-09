@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import '../utils/forty_two_user_utils.dart';
 
 class UserData extends StatelessWidget {
@@ -14,6 +13,7 @@ class UserData extends StatelessWidget {
     super.key,
   });
 
+    // Generate the widget for profile card
   Widget _infoTile(String label, String value, double width) {
     return SizedBox(
       width: width,
@@ -51,6 +51,7 @@ class UserData extends StatelessWidget {
     );
   }
 
+  // Generate the profile card with all datas
   @override
   Widget build(BuildContext context) {
     final accent = Colors.white.withOpacity(0.92);
@@ -97,7 +98,7 @@ class UserData extends StatelessWidget {
                                 )
                               : null,
                           onBackgroundImageError: (exception, stackTrace) {
-                            debugPrint('Error cargando imagen: $exception');
+                            debugPrint('Error loading image: $exception');
                           },
                         ),
                       ),
@@ -173,12 +174,12 @@ class UserData extends StatelessWidget {
                         spacing: spacing,
                         runSpacing: spacing,
                         children: [
-                          _infoTile('Nivel', extractUserLevel(user['cursus_users'] as List<dynamic>?)?.toStringAsFixed(2) ?? '-', tileWidth),
-                          _infoTile('Ubicacion', user['location']?.toString() ?? '-', tileWidth),
-                          _infoTile('Billetera', user['wallet']?.toString() ?? '-', tileWidth),
-                          _infoTile('Evaluaciones', user['correction_point']?.toString() ?? '-', tileWidth),
+                          _infoTile('Level', extractUserLevel(user['cursus_users'] as List<dynamic>?)?.toStringAsFixed(2) ?? '-', tileWidth),
+                          _infoTile('Location', user['location']?.toString() ?? '-', tileWidth),
+                          _infoTile('Wallet', user['wallet']?.toString() ?? '-', tileWidth),
+                          _infoTile('Evaluations', user['correction_point']?.toString() ?? '-', tileWidth),
                           _infoTile('Campus', formatUserCampus(user), tileWidth),
-                          _infoTile('Ingreso', formatUserCreatedAt(user), tileWidth),
+                          _infoTile('Joined', formatUserCreatedAt(user), tileWidth),
                         ],
                       );
                     },

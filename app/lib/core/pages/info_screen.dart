@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import '../components/user_data.dart';
 import '../components/user_projects.dart';
 import '../components/user_skills.dart';
@@ -26,6 +25,7 @@ class _InfoScreenState extends State<InfoScreen> {
     _fetchUser();
   }
 
+  // Get the selected user's profile from the API.
   Future<void> _fetchUser() async {
     try {
       final user = await _api.fetchUser(widget.login);
@@ -43,6 +43,7 @@ class _InfoScreenState extends State<InfoScreen> {
     }
   }
 
+  // Create the profile page with loading, error, and content states.
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -73,7 +74,7 @@ class _InfoScreenState extends State<InfoScreen> {
                               Navigator.pop(context);
                             },
                             icon: const Icon(Icons.arrow_back),
-                            label: const Text('Atras'),
+                            label: const Text('Back'),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.white.withOpacity(0.95),
                               foregroundColor: const Color(0xFF0C2E5A),
@@ -89,7 +90,7 @@ class _InfoScreenState extends State<InfoScreen> {
                           ),
                         ),
                         const Text(
-                          'Perfil 42',
+                          '42 Profile',
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 22,

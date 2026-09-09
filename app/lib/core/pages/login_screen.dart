@@ -1,7 +1,5 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
-
 import '../services/forty_two_api.dart';
 import 'info_screen.dart';
 
@@ -27,6 +25,7 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
+  // Wait a milisecond before performing the search.
   void _onQueryChanged(String value) {
     final query = value.trim();
     _debounce?.cancel();
@@ -40,7 +39,7 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-    _debounce = Timer(const Duration(milliseconds: 350), () async {
+    _debounce = Timer(const Duration(milliseconds: 450), () async {
       setState(() {
         _isLoading = true;
         _error = null;
@@ -63,10 +62,11 @@ class _LoginScreenState extends State<LoginScreen> {
     });
   }
 
+  // Opens the selected user profile screen.
   void _openProfile(String? login) {
     if (login == null || login.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Login no disponible.')),
+        const SnackBar(content: Text('Login not available.')),
       );
       return;
     }
@@ -77,6 +77,7 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
+  // Create the login search page.
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -117,6 +118,7 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
+  // Builds the search card, loading indicator, and result list.
   Widget _buildSearchCard(double resultHeight) {
     return Container(
       padding: const EdgeInsets.all(28),
@@ -203,7 +205,7 @@ class _LoginScreenState extends State<LoginScreen> {
               _controller.text.trim().length >= 2) ...[
             const SizedBox(height: 12),
             const Text(
-              'No users found.',
+              'No users found',
               textAlign: TextAlign.center,
               style: TextStyle(color: Colors.blueGrey),
             ),

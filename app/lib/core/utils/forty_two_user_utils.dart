@@ -1,3 +1,4 @@
+// Get cursus in this priority Zip > cursus > piscine
 Map<String, dynamic>? selectPrimaryCursusUser(List<dynamic>? cursusUsers) {
   if (cursusUsers == null || cursusUsers.isEmpty) {
     return null;
@@ -35,6 +36,7 @@ Map<String, dynamic>? selectPrimaryCursusUser(List<dynamic>? cursusUsers) {
   return zipMatch ?? coreMatch ?? nonPiscineMatch ?? anyMatch;
 }
 
+// Get the level of cursus User
 double? extractUserLevel(List<dynamic>? cursusUsers) {
   final primary = selectPrimaryCursusUser(cursusUsers);
   final level = primary?['level'];
@@ -44,6 +46,7 @@ double? extractUserLevel(List<dynamic>? cursusUsers) {
   return null;
 }
 
+// Get and sort the skills cursus
 List<Map<String, dynamic>> extractUserSkills(List<dynamic>? cursusUsers) {
   final primary = selectPrimaryCursusUser(cursusUsers);
   final skills = primary?['skills'];
@@ -61,6 +64,7 @@ List<Map<String, dynamic>> extractUserSkills(List<dynamic>? cursusUsers) {
   return list;
 }
 
+// Formats the account creation date as DD/MM/YYYY.
 String formatUserCreatedAt(Map<String, dynamic> user) {
   final raw = user['created_at']?.toString();
   if (raw == null || raw.isEmpty) {
@@ -76,6 +80,7 @@ String formatUserCreatedAt(Map<String, dynamic> user) {
   return '$day/$month/$year';
 }
 
+// Get the campus name and country
 String formatUserCampus(Map<String, dynamic> user) {
   final campuses = user['campus'] as List<dynamic>?;
   if (campuses == null || campuses.isEmpty) {
@@ -89,10 +94,15 @@ String formatUserCampus(Map<String, dynamic> user) {
     return '-';
   }
   final name = primary['name']?.toString() ?? '-';
+  final country = primary['country']?.toString();
+  if (country != null && country.isNotEmpty) {
+    return '$name ($country)';
+  }
   final city = primary['city']?.toString();
   return city == null || city.isEmpty ? name : '$name ($city)';
 }
 
+// Formats the pool month and year
 String formatUserPool(Map<String, dynamic> user) {
   final poolYear = user['pool_year']?.toString();
   final poolMonth = user['pool_month']?.toString();
@@ -102,6 +112,7 @@ String formatUserPool(Map<String, dynamic> user) {
   return '$poolMonth $poolYear';
 }
 
+// Get the user's profile image URL from the API
 String? extractUserImageUrl(Map<String, dynamic> user) {
   final image = user['image'];
   if (image is String) {
@@ -119,4 +130,5 @@ String? extractUserImageUrl(Map<String, dynamic> user) {
   return null;
 }
 
+// Normalizes text for case-insensitive comparisons.
 String _normalizedText(Object? value) => value?.toString().toLowerCase().trim() ?? '';

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import '../services/forty_two_api.dart';
 import '../utils/forty_two_user_utils.dart';
 
@@ -29,6 +28,7 @@ class _UserSkillsState extends State<UserSkills> {
     _fetchSkills();
   }
 
+  // Get the user's skills from the API.
   Future<void> _fetchSkills() async {
     try {
       final user = await _api.fetchUser(widget.login);
@@ -48,6 +48,7 @@ class _UserSkillsState extends State<UserSkills> {
     }
   }
 
+  // Get the skills from the selected cursus data.
   List<Map<String, dynamic>> _extractSkills(List<dynamic>? cursusUsers) {
     if (cursusUsers == null) {
       return [];
@@ -56,6 +57,7 @@ class _UserSkillsState extends State<UserSkills> {
     return extractUserSkills(cursusUsers);
   }
 
+  // Create the card of skills with progess and values
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
@@ -74,7 +76,7 @@ class _UserSkillsState extends State<UserSkills> {
 
     if (_skills.isEmpty) {
       return const Text(
-        'Sin habilidades disponibles.',
+        'No skills available.',
         style: TextStyle(color: Colors.white),
       );
     }
@@ -99,7 +101,7 @@ class _UserSkillsState extends State<UserSkills> {
           Row(
             children: [
               const Text(
-                'Habilidades',
+                'Skills',
                 style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w700,

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-
-import '../utils/forty_two_user_utils.dart';
 import '../services/forty_two_api.dart';
+import '../utils/forty_two_user_utils.dart';
 
 class UserProjects extends StatefulWidget {
   final String login;
@@ -30,18 +29,18 @@ class _UserProjectsState extends State<UserProjects> {
     _fetchProjects();
   }
 
+  // Loads the user projects and groups by section.
   Future<void> _fetchProjects() async {
     try {
       final user = await _api.fetchUser(widget.login);
       final userId = user['id'];
 
       if (userId is! int) {
-        throw Exception('Identificador de usuario invalido');
+        throw Exception('Invalid user identifier');
       }
 
       final projectsUsers = await _api.fetchUserProjects(userId);
       final cursusUsers = user['cursus_users'] as List<dynamic>?;
-
       final sections = _extractFinishedProjectsBySection(
         projectsUsers,
         cursusUsers,
@@ -51,8 +50,7 @@ class _UserProjectsState extends State<UserProjects> {
 
       setState(() {
         _sections = sections;
-        _activeSection =
-            sections.keys.isNotEmpty ? sections.keys.first : null;
+        _activeSection = sections.keys.isNotEmpty ? sections.keys.first : null;
         _isLoading = false;
       });
     } catch (error) {
@@ -65,6 +63,7 @@ class _UserProjectsState extends State<UserProjects> {
     }
   }
 
+  // Splits validated projects into C Piscine and Cursus sections.
   Map<String, List<Map<String, dynamic>>> _extractFinishedProjectsBySection(
     List<dynamic>? projectsUsers,
     List<dynamic>? cursusUsers,
@@ -74,108 +73,65 @@ class _UserProjectsState extends State<UserProjects> {
     }
 
     final cPiscineIds = <int>{};
-    var primaryCursusCompleted = false;
 
     if (cursusUsers != null) {
-      var i = 0;
-
-      while (i < cursusUsers.length) {
-        final entry = cursusUsers[i];
-
-        if (entry is Map<String, dynamic>) {
-          final cursus = entry['cursus'] as Map<String, dynamic>?;
-          final id = cursus?['id'];
-
-          if (id is int) {
-            final slug = cursus?['slug']?.toString().toLowerCase() ?? '';
-
-            final name = cursus?['name']?.toString().toLowerCase() ?? '';
-            final isCPiscine = slug == 'piscine-c' ||
-                slug == 'c-piscine' ||
-                name == 'c piscine' ||
-                name == 'piscine c';
-
-            if (isCPiscine) {
-              cPiscineIds.add(id);
-            }
-          }
-        }
-
-        i++;
-      }
-    }
-
-    final primaryCursus = selectPrimaryCursusUser(cursusUsers);
-    primaryCursusCompleted = primaryCursus?['completed'] == true;
-
-    /*
-     * Si el 42cursus está completado mostramos
-     * "Cursus + Outer", si no mostramos "Cursus".
-     */
-    final cursusSectionName =
-      primaryCursusCompleted ? 'Cursus + Outer' : 'Cursus';
-
-    final sections = <String, List<Map<String, dynamic>>>{
-      'C Piscine': [],
-      cursusSectionName: [],
-    };
-
-    /*
-     * Recorremos todos los proyectos del usuario.
-     *
-     * IMPORTANTE:
-     * Solo mostramos proyectos con resultado de validacion, tanto aprobados
-     * como fallidos. No usamos el campo "status".
-     */
-    var i = 0;
-
-    while (i < projectsUsers.length) {
-      final entry = projectsUsers[i];
-
-      if (entry is Map<String, dynamic>) {
-        if (entry['validated?'] is! bool) {
-          i++;
+      for (final entry in cursusUsers) {
+        if (entry is! Map<String, dynamic>) {
           continue;
         }
 
-        final cursusIds = entry['cursus_ids'] as List<dynamic>?;
+        final cursus = entry['cursus'] as Map<String, dynamic>?;
+        final id = cursus?['id'];
+        if (id is! int) {
+          continue;
+        }
 
-        final ids =
-            cursusIds?.whereType<int>().toSet() ?? <int>{};
+        final slug = cursus?['slug']?.toString().toLowerCase() ?? '';
+        final name = cursus?['name']?.toString().toLowerCase() ?? '';
+        final isCPiscine = slug == 'piscine-c' ||
+            slug == 'c-piscine' ||
+            name == 'c piscine' ||
+            name == 'piscine c';
 
-        final isPiscineProject =
-            cPiscineIds.isNotEmpty &&
-            ids.intersection(cPiscineIds).isNotEmpty;
-
-        if (isPiscineProject) {
-          sections['C Piscine']!.add(entry);
-        } else {
-          sections[cursusSectionName]!.add(entry);
+        if (isCPiscine) {
+          cPiscineIds.add(id);
         }
       }
-      i++;
     }
 
-    /*
-     * Ordenamos los proyectos alfabéticamente
-     * dentro de cada sección.
-     */
+    final sections = <String, List<Map<String, dynamic>>>{
+      'C Piscine': [],
+      'Cursus': [],
+    };
+
+    for (final entry in projectsUsers) {
+      if (entry is! Map<String, dynamic>) {
+        continue;
+      }
+
+      if (entry['validated?'] is! bool) {
+        continue;
+      }
+
+      final cursusIds = entry['cursus_ids'] as List<dynamic>?;
+      final ids = cursusIds?.whereType<int>().toSet() ?? <int>{};
+      final isPiscineProject =
+          cPiscineIds.isNotEmpty && ids.intersection(cPiscineIds).isNotEmpty;
+
+      if (isPiscineProject) {
+        sections['C Piscine']!.add(entry);
+      } else {
+        sections['Cursus']!.add(entry);
+      }
+    }
+
     for (final list in sections.values) {
       list.sort((a, b) {
-        final aProject =
-            a['project'] as Map<String, dynamic>?;
-        final bProject =
-            b['project'] as Map<String, dynamic>?;
+        final aProject = a['project'] as Map<String, dynamic>?;
+        final bProject = b['project'] as Map<String, dynamic>?;
 
-        final aName =
-            (aProject?['name'] ?? '')
-                .toString()
-                .toLowerCase();
-
-        final bName =
-            (bProject?['name'] ?? '')
-                .toString()
-                .toLowerCase();
+        final aName = (aProject?['name'] ?? '').toString().toLowerCase();
+        final bName = (bProject?['name'] ?? '').toString().toLowerCase();
 
         return aName.compareTo(bName);
       });
@@ -184,18 +140,18 @@ class _UserProjectsState extends State<UserProjects> {
     return sections;
   }
 
+  // Total count of validated proyects across all sections.
   int get _totalCount {
     var total = 0;
 
     for (final list in _sections.values) {
-      total += list
-          .where((project) => project['validated?'] == true)
-          .length;
+      total += list.where((project) => project['validated?'] == true).length;
     }
 
     return total;
   }
 
+  // Create the card with tabs contab and proyects.
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
@@ -218,18 +174,15 @@ class _UserProjectsState extends State<UserProjects> {
 
     if (_sections.isEmpty) {
       return const Text(
-        'Sin proyectos finalizados.',
+        'No finished projects.',
         style: TextStyle(
           color: Colors.white,
         ),
       );
     }
 
-    final activeKey =
-        _activeSection ?? _sections.keys.first;
-
-    final activeProjects =
-        _sections[activeKey] ?? [];
+    final activeKey = _activeSection ?? _sections.keys.first;
+    final activeProjects = _sections[activeKey] ?? [];
 
     return Container(
       padding: const EdgeInsets.all(18),
@@ -257,7 +210,7 @@ class _UserProjectsState extends State<UserProjects> {
               crossAxisAlignment: WrapCrossAlignment.center,
               children: [
                 const Text(
-                  'Proyectos finalizados',
+                  'Finished projects',
                   style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
@@ -285,9 +238,7 @@ class _UserProjectsState extends State<UserProjects> {
               ],
             ),
           ),
-
           const SizedBox(height: 14),
-
           Wrap(
             spacing: 8,
             runSpacing: 8,
@@ -309,10 +260,8 @@ class _UserProjectsState extends State<UserProjects> {
                       ? const Color(0xFF1E3A8A)
                       : const Color(0xFF475569),
                 ),
-                backgroundColor:
-                    const Color(0xFFF1F5FF),
-                selectedColor:
-                    const Color(0xFFE6F1FF),
+                backgroundColor: const Color(0xFFF1F5FF),
+                selectedColor: const Color(0xFFE6F1FF),
                 side: BorderSide(
                   color: isActive
                       ? const Color(0xFF93C5FD)
@@ -321,43 +270,23 @@ class _UserProjectsState extends State<UserProjects> {
               );
             }).toList(),
           ),
-
           const SizedBox(height: 14),
-
           SizedBox(
             height: widget.maxListHeight,
             child: ListView.separated(
-              shrinkWrap:
-                  widget.maxListHeight == null,
+              shrinkWrap: widget.maxListHeight == null,
               physics: widget.maxListHeight == null
                   ? const NeverScrollableScrollPhysics()
                   : const BouncingScrollPhysics(),
               itemCount: activeProjects.length,
-              separatorBuilder: (_, __) =>
-                  const SizedBox(height: 12),
+              separatorBuilder: (_, __) => const SizedBox(height: 12),
               itemBuilder: (context, index) {
-                final projectUser =
-                    activeProjects[index];
-
-                final project =
-                    projectUser['project']
-                        as Map<String, dynamic>?;
-
-                final name =
-                    (project?['name'] ?? '-').toString();
-
-                final finalMark =
-                    projectUser['final_mark'];
-
-                /*
-                 * El estado visual también depende de
-                 * validated?, no de status.
-                 */
-                final validated =
-                    projectUser['validated?'] == true;
-
-                final statusText =
-                    validated ? 'OK' : 'Fallido';
+                final projectUser = activeProjects[index];
+                final project = projectUser['project'] as Map<String, dynamic>?;
+                final name = (project?['name'] ?? '-').toString();
+                final finalMark = projectUser['final_mark'];
+                final validated = projectUser['validated?'] == true;
+                final statusText = validated ? 'OK' : 'Failed';
 
                 final badgeColor = validated
                     ? const Color(0xFFDCFCE7)
@@ -368,15 +297,13 @@ class _UserProjectsState extends State<UserProjects> {
                     : const Color(0xFF991B1B);
 
                 return Container(
-                  padding:
-                      const EdgeInsets.symmetric(
+                  padding: const EdgeInsets.symmetric(
                     horizontal: 12,
                     vertical: 10,
                   ),
                   decoration: BoxDecoration(
                     color: const Color(0xFFF8FAFF),
-                    borderRadius:
-                        BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: const Color(0xFFE3E7EF),
                     ),
@@ -387,45 +314,34 @@ class _UserProjectsState extends State<UserProjects> {
                         child: Text(
                           name,
                           style: const TextStyle(
-                            fontWeight:
-                                FontWeight.w600,
-                            color:
-                                Color(0xFF0F172A),
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF0F172A),
                           ),
                         ),
                       ),
-
                       const SizedBox(width: 10),
-
                       Text(
-                        finalMark == null
-                            ? '-'
-                            : finalMark.toString(),
+                        finalMark == null ? '-' : finalMark.toString(),
                         style: const TextStyle(
                           fontSize: 12,
                           color: Color(0xFF475569),
                         ),
                       ),
-
                       const SizedBox(width: 10),
-
                       Container(
-                        padding:
-                            const EdgeInsets.symmetric(
+                        padding: const EdgeInsets.symmetric(
                           horizontal: 8,
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
                           color: badgeColor,
-                          borderRadius:
-                              BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
                           statusText,
                           style: TextStyle(
                             fontSize: 11,
-                            fontWeight:
-                                FontWeight.w700,
+                            fontWeight: FontWeight.w700,
                             color: badgeText,
                           ),
                         ),
