@@ -1,4 +1,4 @@
-.PHONY: docker-up docker-down setup-env setup-flutter android-studio
+.PHONY: docker-up docker-down setup-env setup-flutter
 
 setup-flutter:
 	@cd app && bash ../scripts/setup_flutter.sh
@@ -43,13 +43,3 @@ docker-up: setup-env
 
 docker-down:
 	docker compose down
-
-android-studio:
-	@if command -v studio >/dev/null 2>&1; then \
-		studio "$(CURDIR)/app" >/dev/null 2>&1 & \
-	elif command -v android-studio >/dev/null 2>&1; then \
-		android-studio "$(CURDIR)/app" >/dev/null 2>&1 & \
-	else \
-		printf '%s\n' 'No se encontro Android Studio en el PATH.'; \
-		exit 1; \
-	fi
