@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import '../utils/forty_two_user_utils.dart';
 import '../services/forty_two_api.dart';
 
 class UserProjects extends StatefulWidget {
@@ -72,7 +74,7 @@ class _UserProjectsState extends State<UserProjects> {
     }
 
     final cPiscineIds = <int>{};
-    var coreCompleted = false;
+    var primaryCursusCompleted = false;
 
     if (cursusUsers != null) {
       var i = 0;
@@ -93,9 +95,7 @@ class _UserProjectsState extends State<UserProjects> {
                 name == 'c piscine' ||
                 name == 'piscine c';
 
-            if (slug == '42cursus') {
-              coreCompleted = coreCompleted || entry['completed'] == true;
-            } else if (isCPiscine) {
+            if (isCPiscine) {
               cPiscineIds.add(id);
             }
           }
@@ -105,12 +105,15 @@ class _UserProjectsState extends State<UserProjects> {
       }
     }
 
+    final primaryCursus = selectPrimaryCursusUser(cursusUsers);
+    primaryCursusCompleted = primaryCursus?['completed'] == true;
+
     /*
      * Si el 42cursus está completado mostramos
      * "Cursus + Outer", si no mostramos "Cursus".
      */
     final cursusSectionName =
-        coreCompleted ? 'Cursus + Outer' : 'Cursus';
+      primaryCursusCompleted ? 'Cursus + Outer' : 'Cursus';
 
     final sections = <String, List<Map<String, dynamic>>>{
       'C Piscine': [],

@@ -1,22 +1,23 @@
 import 'package:flutter/material.dart';
 
 import '../services/forty_two_api.dart';
+import '../utils/forty_two_user_utils.dart';
 
-class UserLevel extends StatefulWidget {
+class UserSkills extends StatefulWidget {
   final String login;
   final double? maxListHeight;
 
-  const UserLevel({
+  const UserSkills({
     required this.login,
     this.maxListHeight,
     super.key,
   });
 
   @override
-  State<UserLevel> createState() => _UserLevelState();
+  State<UserSkills> createState() => _UserSkillsState();
 }
 
-class _UserLevelState extends State<UserLevel> {
+class _UserSkillsState extends State<UserSkills> {
   final _api = FortyTwoApi();
   List<Map<String, dynamic>> _skills = [];
   bool _isLoading = true;
@@ -52,34 +53,7 @@ class _UserLevelState extends State<UserLevel> {
       return [];
     }
 
-    Map<String, dynamic>? fallback;
-    for (final cursus in cursusUsers) {
-      if (cursus is! Map<String, dynamic>) {
-        continue;
-      }
-      final skills = cursus['skills'];
-      if (skills is! List) {
-        continue;
-      }
-      final cursusInfo = cursus['cursus'] as Map<String, dynamic>?;
-      final slug = cursusInfo?['slug']?.toString();
-      if (slug == '42cursus') {
-        return skills.whereType<Map<String, dynamic>>().toList();
-      }
-      fallback ??= cursus;
-    }
-
-    final skills = fallback?['skills'];
-    if (skills is List) {
-      final list = skills.whereType<Map<String, dynamic>>().toList();
-      list.sort((a, b) {
-        final aName = (a['name'] ?? '').toString().toLowerCase();
-        final bName = (b['name'] ?? '').toString().toLowerCase();
-        return aName.compareTo(bName);
-      });
-      return list;
-    }
-    return [];
+    return extractUserSkills(cursusUsers);
   }
 
   @override

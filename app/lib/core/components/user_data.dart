@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../utils/forty_two_user_utils.dart';
+
 class UserData extends StatelessWidget {
   final Map<String, dynamic> user;
   final bool forceTwoColumns;
@@ -11,33 +13,6 @@ class UserData extends StatelessWidget {
     this.fillHeight = false,
     super.key,
   });
-
-  double? _extractLevel() {
-    final cursusUsers = user['cursus_users'] as List<dynamic>?;
-    if (cursusUsers == null || cursusUsers.isEmpty) {
-      return null;
-    }
-
-    Map<String, dynamic>? primary;
-    for (final entry in cursusUsers) {
-      if (entry is! Map<String, dynamic>) {
-        continue;
-      }
-      final cursus = entry['cursus'] as Map<String, dynamic>?;
-      final slug = cursus?['slug']?.toString();
-      if (slug == '42cursus') {
-        primary = entry;
-        break;
-      }
-      primary ??= entry;
-    }
-
-    final level = primary?['level'];
-    if (level is num) {
-      return level.toDouble();
-    }
-    return null;
-  }
 
   Widget _infoTile(String label, String value, double width) {
     return SizedBox(
@@ -76,48 +51,6 @@ class UserData extends StatelessWidget {
     );
   }
 
-  String _formatCreatedAt() {
-    final raw = user['created_at']?.toString();
-    if (raw == null || raw.isEmpty) {
-      return '-';
-    }
-    final parsed = DateTime.tryParse(raw);
-    if (parsed == null) {
-      return raw;
-    }
-    final year = parsed.year.toString().padLeft(4, '0');
-    final month = parsed.month.toString().padLeft(2, '0');
-    final day = parsed.day.toString().padLeft(2, '0');
-    return '$day/$month/$year';
-  }
-
-  String _formatCampus() {
-    final campuses = user['campus'] as List<dynamic>?;
-    if (campuses == null || campuses.isEmpty) {
-      return '-';
-    }
-    final primary = campuses.firstWhere(
-      (campus) => campus is Map<String, dynamic>,
-      orElse: () => campuses.first,
-    );
-    if (primary is! Map<String, dynamic>) {
-      return '-';
-    }
-    final name = primary['name']?.toString() ?? '-';
-    final city = primary['city']?.toString();
-    return city == null || city.isEmpty ? name : '$name ($city)';
-  }
-
-  String _formatPool() {
-    final poolYear = user['pool_year']?.toString();
-    final poolMonth = user['pool_month']?.toString();
-    if (poolYear == null || poolMonth == null) {
-      return '-';
-    }
-    return '$poolMonth $poolYear';
-  }
-
-
   @override
   Widget build(BuildContext context) {
     final accent = Colors.white.withOpacity(0.92);
@@ -153,15 +86,10 @@ class UserData extends StatelessWidget {
                         child: CircleAvatar(
                           radius: 44,
                           backgroundColor: Colors.white,
-                          backgroundImage: user['image'] != null
-                              ? NetworkImage(
-                                  (user['image'] is String
-                                          ? user['image']
-                                          : user['image']['versions']?['large']) ??
-                                      '',
-                                )
-                              : null,
-                          child: user['image'] == null
+                          backgroundImage: extractUserImageUrl(user) != null
+                              ? NetworkImage(extractUserImageUrl(user)!)
+                            : null,
+                          child: extractUserImageUrl(user) == null
                               ? Icon(
                                   Icons.person,
                                   size: 34,
@@ -197,7 +125,7 @@ class UserData extends StatelessWidget {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              'Pool: ${_formatPool()}',
+                              'Pool: ${formatUserPool(user)}',
                               style: const TextStyle(
                                 color: Color(0xFF64748B),
                                 fontSize: 12,
@@ -245,12 +173,12 @@ class UserData extends StatelessWidget {
                         spacing: spacing,
                         runSpacing: spacing,
                         children: [
-                          _infoTile('Nivel', _extractLevel()?.toStringAsFixed(2) ?? '-', tileWidth),
+                          _infoTile('Nivel', extractUserLevel(user['cursus_users'] as List<dynamic>?)?.toStringAsFixed(2) ?? '-', tileWidth),
                           _infoTile('Ubicacion', user['location']?.toString() ?? '-', tileWidth),
                           _infoTile('Billetera', user['wallet']?.toString() ?? '-', tileWidth),
                           _infoTile('Evaluaciones', user['correction_point']?.toString() ?? '-', tileWidth),
-                          _infoTile('Campus', _formatCampus(), tileWidth),
-                          _infoTile('Ingreso', _formatCreatedAt(), tileWidth),
+                          _infoTile('Campus', formatUserCampus(user), tileWidth),
+                          _infoTile('Ingreso', formatUserCreatedAt(user), tileWidth),
                         ],
                       );
                     },

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../components/user_data.dart';
-import '../components/user_level.dart';
 import '../components/user_projects.dart';
+import '../components/user_skills.dart';
 import '../services/forty_two_api.dart';
 
 class InfoScreen extends StatefulWidget {
@@ -143,7 +143,7 @@ class _InfoScreenState extends State<InfoScreen> {
                                               Expanded(
                                                 child: SizedBox(
                                                   height: maxCardHeight,
-                                                  child: UserLevel(
+                                                  child: UserSkills(
                                                     login: widget.login,
                                                     maxListHeight:
                                                         maxCardHeight - 120,
@@ -167,7 +167,7 @@ class _InfoScreenState extends State<InfoScreen> {
                                             children: [
                                               UserData(user: _user!),
                                               const SizedBox(height: 16),
-                                              UserLevel(login: widget.login),
+                                              UserSkills(login: widget.login),
                                               const SizedBox(height: 16),
                                               UserProjects(login: widget.login),
                                             ],
