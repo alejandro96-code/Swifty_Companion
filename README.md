@@ -24,6 +24,13 @@ useful information clearly and adapted to different screen sizes.
 - Docker
 - Official 42 API
 
+## How to start
+
+- Clone your proyecto
+- Create a app in for connect 42 API
+- Follow terminal steps
+
+
 ## What is Flutter?
 
 **Flutter** is a Google framework for developing mobile, web, and desktop applications from a single codebase (Dart). The main idea is: **"Write once, run anywhere"**.
